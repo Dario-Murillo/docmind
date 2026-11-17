@@ -37,12 +37,18 @@ var ollamaEndpoint = builder.Configuration["Ollama:Endpoint"] is { Length: > 0 }
     ? new Uri(endpoint)
     : null;
 
+// The model that answers questions. Embeddings stay on nomic-embed-text: the stored vectors
+// depend on it, so it can't change without re-indexing every document.
+var chatModel = builder.Configuration["Ollama:ChatModel"] is { Length: > 0 } model
+    ? model
+    : CompletionService.DefaultModelId;
+
 // The chunking tokenizer and the Ollama-backed embedding/completion clients hold no per-request
 // state, so they are singletons. The services that use DocMindDbContext are scoped like the context
 // itself, which EF Core registers per request; QueryService is scoped too, since it depends on one.
 builder.Services.AddSingleton<IChunkingService, ChunkingService>();
 builder.Services.AddSingleton<IEmbeddingService>(_ => new EmbeddingService(ollamaEndpoint));
-builder.Services.AddSingleton<ICompletionService>(_ => new CompletionService(ollamaEndpoint));
+builder.Services.AddSingleton<ICompletionService>(_ => new CompletionService(ollamaEndpoint, chatModel));
 builder.Services.AddScoped<IVectorStoreService, PgVectorStoreService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<IQueryService, QueryService>();

@@ -48,7 +48,12 @@ public class CompletionService(IChatClient chatClient, Uri? endpoint = null, str
 
         try
         {
-            var options = new ChatOptions().AddOllamaOption(OllamaOption.NumCtx, ContextWindowTokens);
+            // Reasoning models (qwen3, qwen3.5) think before answering, which multiplies the time to
+            // an answer while the reasoning is never shown. Models that can't think, like llama3.1,
+            // accept think=false and ignore it.
+            var options = new ChatOptions()
+                .AddOllamaOption(OllamaOption.NumCtx, ContextWindowTokens)
+                .AddOllamaOption(OllamaOption.Think, false);
             var response = await this.chatClient.GetResponseAsync(prompt, options);
             return response.Text;
         }
