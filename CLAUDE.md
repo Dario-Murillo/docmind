@@ -92,6 +92,14 @@ npm test
 The API must be running (`dotnet run --project DocMind.Api`) for the UI to work — CORS is only opened for `http://localhost:4200` when DocMind.Api runs in the Development environment.
 Open the UI as `http://localhost:4200`, not `127.0.0.1`: the session cookie only travels because the UI and the API are both on `localhost`.
 
+## Commits
+
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`, in English, imperative mood, no trailing period.
+- Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`, `style`.
+- Scope is optional and names the area: `api`, `core`, `ui`, `tests`, `docker`, `ci`. Example: `fix(core): return 422 for password-protected PDFs`.
+- Breaking changes add `!` after the type/scope (`feat(api)!: ...`) and a `BREAKING CHANGE:` footer.
+- No `Co-Authored-By` trailer for Claude.
+
 ## C# conventions
 
 - Target framework: `net9.0`, with `<Nullable>enable</Nullable>` and `<ImplicitUsings>enable</ImplicitUsings>` across all projects — write nullable-aware code and rely on implicit global usings rather than re-adding common `using` directives.
