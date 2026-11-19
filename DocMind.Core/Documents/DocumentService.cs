@@ -80,7 +80,7 @@ public class DocumentService(
         // through leaves the database untouched.
         foreach (var chunk in this.chunkingService.ChunkText(text, document.Id))
         {
-            var vector = await this.embeddingService.GenerateEmbeddingAsync(chunk.Content);
+            var vector = await this.embeddingService.GenerateDocumentEmbeddingAsync(chunk.Content);
             document.Chunks.Add(new DocumentChunk
             {
                 Id = chunk.Id,

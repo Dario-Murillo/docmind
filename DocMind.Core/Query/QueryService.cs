@@ -20,7 +20,7 @@ public class QueryService(
             throw new ArgumentException("Question must not be null or empty.", nameof(question));
         }
 
-        var queryVector = await this.embeddingService.GenerateEmbeddingAsync(question);
+        var queryVector = await this.embeddingService.GenerateQueryEmbeddingAsync(question);
         var scoredChunks = await this.vectorStoreService.SearchAsync(userId, notebookId, queryVector, topK);
         var contextChunks = scoredChunks.Select(scored => scored.Chunk).ToList();
 

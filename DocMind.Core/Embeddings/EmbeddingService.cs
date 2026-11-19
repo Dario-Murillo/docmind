@@ -9,6 +9,11 @@ public class EmbeddingService(IEmbeddingGenerator<string, Embedding<float>> embe
     public const string DefaultModelId = "nomic-embed-text";
     private static readonly Uri DefaultEndpoint = new("http://localhost:11434");
 
+    // nomic-embed-text was trained with these task prefixes. Changing them changes every vector,
+    // so stored documents would have to be re-indexed.
+    private const string DocumentPrefix = "search_document: ";
+    private const string QueryPrefix = "search_query: ";
+
     private readonly IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
     private readonly Uri endpoint = endpoint ?? DefaultEndpoint;
 
@@ -19,16 +24,31 @@ public class EmbeddingService(IEmbeddingGenerator<string, Embedding<float>> embe
 
     public string ModelId { get; } = modelId;
 
-    public async Task<float[]> GenerateEmbeddingAsync(string text)
+    public Task<float[]> GenerateDocumentEmbeddingAsync(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             throw new ArgumentException("Text must not be null or empty.", nameof(text));
         }
 
+        return this.GenerateAsync(DocumentPrefix + text);
+    }
+
+    public Task<float[]> GenerateQueryEmbeddingAsync(string question)
+    {
+        if (string.IsNullOrWhiteSpace(question))
+        {
+            throw new ArgumentException("Question must not be null or empty.", nameof(question));
+        }
+
+        return this.GenerateAsync(QueryPrefix + question);
+    }
+
+    private async Task<float[]> GenerateAsync(string prefixedText)
+    {
         try
         {
-            var embeddings = await this.embeddingGenerator.GenerateAsync([text]);
+            var embeddings = await this.embeddingGenerator.GenerateAsync([prefixedText]);
             return embeddings[0].Vector.ToArray();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
