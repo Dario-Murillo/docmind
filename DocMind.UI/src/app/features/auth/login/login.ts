@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../core/auth';
@@ -11,6 +12,7 @@ import { Auth } from '../../../core/auth';
   imports: [
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     RouterLink,
@@ -27,6 +29,7 @@ export class Login {
   protected readonly password = signal('');
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
 
   protected onEmailInput(event: Event): void {
     this.email.set((event.target as HTMLInputElement).value);
@@ -34,6 +37,10 @@ export class Login {
 
   protected onPasswordInput(event: Event): void {
     this.password.set((event.target as HTMLInputElement).value);
+  }
+
+  protected togglePassword(): void {
+    this.showPassword.update((shown) => !shown);
   }
 
   protected onSubmit(event: Event): void {

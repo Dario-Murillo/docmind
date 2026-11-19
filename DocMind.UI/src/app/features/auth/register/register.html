@@ -1,50 +1,82 @@
-<section class="card auth-card">
-  <h2>Create an account</h2>
-  <p class="hint">
-    Passwords need at least 6 characters, with upper and lower case letters, a digit and a symbol.
-  </p>
+<div class="login-page">
+  <section class="brand">
+    <div class="logo">
+      <mat-icon>psychology</mat-icon>
+      <span>DocMind</span>
+    </div>
+    <div class="shapes" aria-hidden="true"><span></span><span></span><span></span></div>
+    <h1>Ask your PDFs.<br />Every answer cites its source.</h1>
+    <ul>
+      <li><mat-icon>lock</mat-icon>Self-hosted — your documents never leave your machine</li>
+      <li>
+        <mat-icon>auto_stories</mat-icon>One notebook per project, with its own documents and chats
+      </li>
+    </ul>
+  </section>
 
-  <form (submit)="onSubmit($event)">
-    <mat-form-field appearance="outline">
-      <mat-label>Email</mat-label>
-      <input
-        matInput
-        type="email"
-        autocomplete="email"
-        required
-        [value]="email()"
-        (input)="onEmailInput($event)"
-      />
-    </mat-form-field>
+  <section class="form-side">
+    <form (submit)="onSubmit($event)">
+      <h2>Create an account</h2>
+      <p class="hint">
+        Passwords need at least 6 characters, with upper and lower case letters, a digit and a
+        symbol.
+      </p>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Password</mat-label>
-      <input
-        matInput
-        type="password"
-        autocomplete="new-password"
-        required
-        [value]="password()"
-        (input)="onPasswordInput($event)"
-      />
-    </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <mat-icon matIconPrefix>mail</mat-icon>
+        <input
+          matInput
+          type="email"
+          autocomplete="email"
+          required
+          [value]="email()"
+          (input)="onEmailInput($event)"
+        />
+      </mat-form-field>
 
-    @if (errors().length > 0) {
-      <ul class="message error">
-        @for (message of errors(); track message) {
-          <li>{{ message }}</li>
-        }
-      </ul>
-    }
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <mat-icon matIconPrefix>key</mat-icon>
+        <input
+          matInput
+          autocomplete="new-password"
+          required
+          [type]="showPassword() ? 'text' : 'password'"
+          [value]="password()"
+          (input)="onPasswordInput($event)"
+        />
+        <button
+          matIconButton
+          matIconSuffix
+          type="button"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          (click)="togglePassword()"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </mat-form-field>
 
-    <button matButton="filled" type="submit" [disabled]="submitting()">
-      @if (submitting()) {
-        <mat-spinner diameter="20" />
-      } @else {
-        Create account
+      @if (errors().length > 0) {
+        <div class="error" role="alert">
+          <mat-icon>error</mat-icon>
+          <ul>
+            @for (message of errors(); track message) {
+              <li>{{ message }}</li>
+            }
+          </ul>
+        </div>
       }
-    </button>
-  </form>
 
-  <p class="hint">Already have an account? <a routerLink="/login">Log in</a></p>
-</section>
+      <button matButton="filled" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Create account
+        }
+      </button>
+
+      <p class="hint switch">Already have an account? <a routerLink="/login">Log in</a></p>
+    </form>
+  </section>
+</div>
