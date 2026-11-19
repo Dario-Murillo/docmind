@@ -4,5 +4,7 @@ public interface IEmbeddingService
 {
     public string ModelId { get; }
 
-    public Task<float[]> GenerateEmbeddingAsync(string text);
+    public Task<float[]> GenerateDocumentEmbeddingAsync(string text);
+
+    public Task<float[]> GenerateQueryEmbeddingAsync(string question);
 }

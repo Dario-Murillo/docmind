@@ -281,7 +281,10 @@ public class DocumentServiceTests(DocMindApiFactory factory)
 
         public string ModelId => FakeModelId;
 
-        public Task<float[]> GenerateEmbeddingAsync(string text)
+        // Indexing never embeds a question.
+        public Task<float[]> GenerateQueryEmbeddingAsync(string question) => throw new NotSupportedException();
+
+        public Task<float[]> GenerateDocumentEmbeddingAsync(string text)
         {
             this.calls++;
             if (this.calls == failOnCall)
