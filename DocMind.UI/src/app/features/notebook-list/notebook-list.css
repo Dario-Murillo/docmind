@@ -5,55 +5,207 @@
 }
 
 .notebooks {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem 1.5rem;
+  padding: 40px 24px 64px;
+  box-sizing: border-box;
 }
 
-.notebook-form {
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.intro {
+  flex: 1 1 260px;
+}
+
+.intro h2 {
+  margin: 0 0 6px;
+  font: var(--mat-sys-display-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.intro p,
+.no-matches {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.search {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin: 1rem 0 1.5rem;
+  gap: 12px;
+  max-width: 420px;
+  height: 48px;
+  margin-bottom: 24px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
 }
 
-.notebook-form mat-form-field {
+.search:focus-within {
+  outline: 2px solid var(--mat-sys-primary);
+}
+
+.search input {
   flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-large);
 }
 
 .notebook-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 16px;
+}
+
+.notebook-card,
+.create-tile {
+  min-height: 196px;
+  box-sizing: border-box;
+  border-radius: 24px;
 }
 
 .notebook-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.notebook-card:hover,
+.create-tile:hover {
   background: var(--mat-sys-surface-container-high);
-  color: var(--mat-sys-on-surface);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.notebook-link {
-  flex: 1;
-  padding: 1.25rem 1.25rem 0;
-  color: inherit;
-  text-decoration: none;
+.card-top {
+  display: flex;
+  justify-content: space-between;
 }
 
-.notebook-link h3 {
-  margin: 0.5rem 0 0.25rem;
+/* Above the link that covers the card. */
+.card-top button {
+  z-index: 1;
+}
+
+.notebook-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+[data-tone='1'] .notebook-icon {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+
+[data-tone='2'] .notebook-icon {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.notebook-card h3 {
+  margin: 0;
+  font: var(--mat-sys-title-large);
   overflow-wrap: anywhere;
 }
 
-.notebook-link .hint {
-  margin: 0;
+.notebook-card a {
+  color: var(--mat-sys-on-surface);
+  text-decoration: none;
+  outline: 0;
 }
 
-.notebook-actions {
+/* Makes the whole card open the notebook with a single link. */
+.notebook-card a::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+}
+
+.notebook-card a:focus-visible::after {
+  outline: 3px solid var(--mat-sys-primary);
+}
+
+.details {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 0.5rem 0.5rem;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: auto 0 0;
+}
+
+.details span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+}
+
+.details mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.create-tile,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-large);
+}
+
+.create-tile {
+  background: none;
+  cursor: pointer;
+}
+
+.empty {
+  padding: 48px 24px;
+  border-radius: 24px;
+  text-align: center;
+}
+
+.title-field {
+  width: 100%;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
 }

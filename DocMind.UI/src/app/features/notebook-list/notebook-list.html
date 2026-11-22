@@ -1,64 +1,132 @@
 <section class="notebooks">
-  <h2>Your notebooks</h2>
-  <p class="hint">Each notebook has its own documents and conversations.</p>
-
-  <form class="notebook-form" (submit)="onSubmit($event)">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>New notebook</mat-label>
-      <input
-        matInput
-        type="text"
-        [maxLength]="maxTitleLength"
-        [value]="title()"
-        (input)="onTitleInput($event)"
-        placeholder="Thesis research"
-      />
-    </mat-form-field>
-    <button matButton="filled" type="submit" [disabled]="!title().trim() || creating()">
+  <div class="page-heading">
+    <div class="intro">
+      <h2>Your notebooks</h2>
+      <p>Each notebook has its own documents and conversations.</p>
+    </div>
+    <button matFab extended class="new-notebook" type="button" (click)="openTitleDialog()">
       <mat-icon>add</mat-icon>
-      Create
+      New notebook
     </button>
-  </form>
+  </div>
+
+  @if (notebooks().length > 0) {
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        aria-label="Search notebooks"
+        placeholder="Search notebooks"
+        [value]="search()"
+        (input)="onSearchInput($event)"
+      />
+    </label>
+  }
 
   @if (error(); as message) {
-    <p class="message error">{{ message }}</p>
+    <p class="error" role="alert"><mat-icon>error</mat-icon>{{ message }}</p>
   }
 
   @if (loaded() && notebooks().length === 0) {
-    <p class="hint">No notebooks yet. Create one to start uploading documents.</p>
+    <div class="empty">
+      <mat-icon>menu_book</mat-icon>
+      <p>No notebooks yet. Create one to start uploading documents.</p>
+    </div>
+  } @else if (loaded() && visibleNotebooks().length === 0) {
+    <p class="no-matches" role="status">No notebooks match “{{ search() }}”.</p>
   }
 
   <div class="notebook-grid">
-    @for (notebook of notebooks(); track notebook.notebookId) {
-      <article class="notebook-card">
-        <a class="notebook-link" [routerLink]="['/notebooks', notebook.notebookId]">
-          <mat-icon>menu_book</mat-icon>
-          <h3>{{ notebook.title }}</h3>
-          <p class="hint">
+    @for (notebook of visibleNotebooks(); track notebook.notebookId) {
+      <!-- The tone comes from the id, so a notebook keeps its color when the list changes. -->
+      <article class="notebook-card" [attr.data-tone]="notebook.notebookId.charCodeAt(0) % 3">
+        <div class="card-top">
+          <span class="notebook-icon"><mat-icon>menu_book</mat-icon></span>
+          <button
+            matIconButton
+            type="button"
+            [attr.aria-label]="'Options for ' + notebook.title"
+            [matMenuTriggerFor]="options"
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #options="matMenu" xPosition="before">
+            <button
+              mat-menu-item
+              class="rename-option"
+              type="button"
+              (click)="openTitleDialog(notebook)"
+            >
+              <mat-icon>edit</mat-icon>
+              <span>Rename</span>
+            </button>
+            <button
+              mat-menu-item
+              class="delete-option"
+              type="button"
+              (click)="deleteNotebook(notebook)"
+            >
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </div>
+
+        <h3>
+          <a [routerLink]="['/notebooks', notebook.notebookId]">{{ notebook.title }}</a>
+        </h3>
+
+        <p class="details">
+          <span>
+            <mat-icon>description</mat-icon>
             {{ notebook.documentCount }}
-            {{ notebook.documentCount === 1 ? 'document' : 'documents' }} ·
+            {{ notebook.documentCount === 1 ? 'document' : 'documents' }}
+          </span>
+          <span>
+            <mat-icon>calendar_today</mat-icon>
             {{ notebook.createdAt | date: 'mediumDate' }}
-          </p>
-        </a>
-        <span class="notebook-actions">
-          <button
-            matIconButton
-            type="button"
-            aria-label="Rename notebook"
-            (click)="renameNotebook(notebook)"
-          >
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button
-            matIconButton
-            type="button"
-            aria-label="Delete notebook"
-            (click)="deleteNotebook(notebook)"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </span>
+          </span>
+        </p>
       </article>
+    }
+
+    @if (notebooks().length > 0 && !search().trim()) {
+      <button class="create-tile" type="button" (click)="openTitleDialog()">
+        <mat-icon>add</mat-icon>
+        Create a notebook
+      </button>
     }
   </div>
 </section>
+
+<ng-template #titleDialog>
+  <h2 mat-dialog-title>{{ editing() ? 'Rename notebook' : 'New notebook' }}</h2>
+  <form (submit)="onSubmit($event)">
+    <mat-dialog-content>
+      <mat-form-field class="title-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Title</mat-label>
+        <input
+          matInput
+          type="text"
+          [maxLength]="maxTitleLength"
+          [value]="title()"
+          (input)="onTitleInput($event)"
+          placeholder="Thesis research"
+        />
+      </mat-form-field>
+
+      @if (dialogError(); as message) {
+        <p class="error" role="alert"><mat-icon>error</mat-icon>{{ message }}</p>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button matButton class="cancel" type="button" mat-dialog-close [disabled]="saving()">
+        Cancel
+      </button>
+      <button matButton="filled" type="submit" [disabled]="!title().trim() || saving()">
+        {{ editing() ? 'Save' : 'Create' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</ng-template>
