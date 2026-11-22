@@ -1,14 +1,13 @@
-<header>
-  <h1>{{ title() }}</h1>
-  <p class="hint">Local, self-hosted RAG document Q&amp;A.</p>
-
-  @if (auth.currentUser(); as user) {
+@if (auth.currentUser(); as user) {
+  <header>
+    <h1>{{ title() }}</h1>
+    <p class="hint">Local, self-hosted RAG document Q&amp;A.</p>
     <div class="session">
       <span>{{ user.email }}</span>
       <button matButton type="button" (click)="logout()">Log out</button>
     </div>
-  }
-</header>
+  </header>
+}
 
 <main>
   <router-outlet />

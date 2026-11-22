@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ValidationProblem } from '../../../core/api';
@@ -12,12 +13,14 @@ import { Auth } from '../../../core/auth';
   imports: [
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     RouterLink,
   ],
   selector: 'app-register',
-  styleUrl: './register.css',
+  // Shares the login page's layout so both auth screens look the same.
+  styleUrls: ['../login/login.css', './register.css'],
   templateUrl: './register.html',
 })
 export class Register {
@@ -28,6 +31,11 @@ export class Register {
   protected readonly password = signal('');
   protected readonly submitting = signal(false);
   protected readonly errors = signal<string[]>([]);
+  protected readonly showPassword = signal(false);
+
+  protected togglePassword(): void {
+    this.showPassword.update((shown) => !shown);
+  }
 
   protected onEmailInput(event: Event): void {
     this.email.set((event.target as HTMLInputElement).value);
