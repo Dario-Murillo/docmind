@@ -1,76 +1,95 @@
-<section class="card chat-card">
-  <h2>{{ conversations.selectedTitle() }}</h2>
-  <p class="hint">Answers are generated only from the context retrieved from uploaded documents.</p>
-
-  <div class="chat-messages">
-    @if (conversations.messages().length === 0) {
-      <p class="hint">Ask a question about your uploaded documents to start a conversation.</p>
+<section class="chat">
+  <div class="chat-header">
+    <h2>{{ conversations.selectedTitle() }}</h2>
+    @if (conversations.selectedId()) {
+      <button
+        matIconButton
+        type="button"
+        aria-label="Delete this chat"
+        [disabled]="conversations.status() === 'loading'"
+        (click)="deleteOpenConversation()"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
     }
+  </div>
 
-    @for (message of conversations.messages(); track $index) {
-      <div class="chat-message" [class.chat-message-user]="message.role === 'user'">
-        <div class="chat-bubble" [class.chat-bubble-error]="message.error">
-          <p>{{ message.text }}</p>
-
-          @if (message.sources && message.sources.length > 0) {
-            <div class="sources">
-              <h3>Sources</h3>
-              <ul>
-                @for (source of message.sources; track $index) {
-                  <li>
-                    <span class="score">{{ source.score | number: '1.2-2' }}</span>
-                    <span class="doc">{{ source.fileName }} #{{ source.sequenceNumber }}</span>
-                    <p class="excerpt">{{ source.excerpt }}</p>
-                  </li>
-                }
-              </ul>
-            </div>
-          }
-        </div>
+  <div #scroller class="messages" role="log" tabindex="0" aria-label="Messages">
+    @if (conversations.messages().length === 0 && !conversations.selectedId()) {
+      <div class="empty">
+        <mat-icon>auto_awesome</mat-icon>
+        <p>Ask a question about your uploaded documents to start a conversation.</p>
       </div>
     }
 
-    @if (conversations.status() === 'loading') {
-      <div class="chat-message">
-        <div class="chat-bubble">
-          <mat-spinner diameter="20" />
+    @for (message of conversations.messages(); track $index) {
+      @if (message.role === 'user') {
+        <p class="question">{{ message.text }}</p>
+      } @else if (message.error) {
+        <p class="error" role="alert">
+          <mat-icon>error</mat-icon>
+          <span>{{ message.text }}</span>
+        </p>
+      } @else {
+        <div class="answer">
+          <p class="author"><mat-icon>auto_awesome</mat-icon>DocMind</p>
+          <p class="answer-text">{{ message.text }}</p>
+          <div class="answer-actions">
+            @if (message.sources?.length; as count) {
+              <button
+                matButton
+                class="show-sources"
+                type="button"
+                [class.selected]="$index === conversations.selectedAnswer()"
+                [attr.aria-pressed]="$index === conversations.selectedAnswer()"
+                (click)="showSources($index)"
+              >
+                <mat-icon>format_quote</mat-icon>
+                {{ count }} {{ count === 1 ? 'source' : 'sources' }}
+              </button>
+            }
+            <button
+              matIconButton
+              type="button"
+              aria-label="Copy answer"
+              [cdkCopyToClipboard]="message.text"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
         </div>
+      }
+    }
+
+    @if (conversations.status() === 'loading') {
+      <div class="thinking">
+        <mat-icon>auto_awesome</mat-icon>
+        <mat-progress-bar mode="indeterminate" aria-label="Generating answer" />
+        <span>Searching your documents…</span>
       </div>
     }
   </div>
 
-  <form class="chat-input-row" (submit)="onSubmit($event)">
-    <mat-form-field class="topk-field" appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Top K</mat-label>
+  <form class="composer" (submit)="onSubmit($event)">
+    <div class="field">
       <input
-        matInput
-        type="number"
-        min="1"
-        [max]="maxTopK"
-        [value]="topK()"
-        (input)="onTopKInput($event)"
-      />
-    </mat-form-field>
-
-    <mat-form-field class="question-field" appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Question</mat-label>
-      <input
-        matInput
         type="text"
+        aria-label="Question"
+        placeholder="Ask a question"
         [maxLength]="maxQuestionLength"
         [value]="question()"
         (input)="onQuestionInput($event)"
-        placeholder="What is DocMind?"
       />
-    </mat-form-field>
-
-    <button
-      matIconButton
-      type="submit"
-      [disabled]="!question().trim() || conversations.status() === 'loading'"
-      aria-label="Send question"
-    >
-      <mat-icon>send</mat-icon>
-    </button>
+      <button
+        matIconButton
+        class="send"
+        type="submit"
+        aria-label="Send question"
+        [disabled]="!question().trim() || conversations.status() === 'loading'"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+    <p class="note">Answers come only from passages retrieved from this notebook's documents.</p>
   </form>
 </section>

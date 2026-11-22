@@ -169,6 +169,64 @@ describe('Conversations', () => {
     expect(texts()).toEqual(['From c2']);
   });
 
+  function answerCiting(documentId: string): MessageResponse {
+    return {
+      ...message('assistant', `From ${documentId}`),
+      sources: [
+        { documentId, fileName: 'file.pdf', sequenceNumber: 1, score: 0.9, excerpt: 'Text' },
+      ],
+    };
+  }
+
+  function openWithAnswers(id: string, ...documentIds: string[]): void {
+    conversations.open(id);
+    http
+      .expectOne((req) => req.url.endsWith(`/conversations/${id}`))
+      .flush(detail(id, documentIds.map(answerCiting)));
+  }
+
+  it('shows the sources of the latest answer until another one is selected', () => {
+    openWithAnswers('c1', 'd1', 'd2');
+    expect(conversations.selectedSources()[0].documentId).toBe('d2');
+
+    conversations.selectAnswer(0);
+
+    expect(conversations.selectedSources()[0].documentId).toBe('d1');
+  });
+
+  it('selects the latest answer again when another conversation is opened', () => {
+    openWithAnswers('c1', 'd1', 'd2');
+    conversations.selectAnswer(0);
+
+    openWithAnswers('c2', 'd3', 'd4');
+
+    expect(conversations.selectedSources()[0].documentId).toBe('d4');
+  });
+
+  it('follows a new answer', () => {
+    load();
+    openWithAnswers('c1', 'd1', 'd2');
+    conversations.selectAnswer(0);
+
+    conversations.ask('More?', 5);
+    http
+      .expectOne((req) => req.method === 'POST')
+      .flush({ ...exchange(conversation('c1'), 'More?', ''), answer: answerCiting('d3') });
+
+    expect(conversations.selectedSources()[0].documentId).toBe('d3');
+  });
+
+  it('drops the link to a deleted document without changing the selected answer', () => {
+    openWithAnswers('c1', 'd1', 'd2');
+    conversations.selectAnswer(0);
+
+    conversations.forgetDocument('d1');
+
+    expect(conversations.selectedAnswer()).toBe(0);
+    expect(conversations.selectedSources()[0].documentId).toBeNull();
+    expect(conversations.messages()[1].sources?.[0].documentId).toBe('d2');
+  });
+
   it('starts a new conversation without calling the API', () => {
     conversations.open('c1');
     http

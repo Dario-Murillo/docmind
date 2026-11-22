@@ -1,7 +1,13 @@
 .login-page {
   display: flex;
-  flex-wrap: wrap;
   min-height: 100vh;
+}
+
+/* Both sides shrink instead of wrapping, which would push the form below the fold. */
+.brand,
+.form-side {
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .brand {

@@ -44,6 +44,26 @@ describe('Workspace', () => {
     http.expectOne((req) => req.url.endsWith('/notebooks/n1/conversations')).flush([]);
   });
 
+  it('asks with the Top K picked in the header', async () => {
+    notebookRequest().flush(research);
+    await fixture.whenStable();
+    http.expectOne((req) => req.url.endsWith('/notebooks/n1/documents')).flush([]);
+    http.expectOne((req) => req.url.endsWith('/notebooks/n1/conversations')).flush([]);
+    const element = fixture.nativeElement as HTMLElement;
+
+    (element.querySelector('.top-k') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    document.querySelectorAll<HTMLButtonElement>('.top-k-option')[7].click();
+    await fixture.whenStable();
+    const input = element.querySelector('app-query input') as HTMLInputElement;
+    input.value = 'Why?';
+    input.dispatchEvent(new Event('input'));
+    element.querySelector('app-query form')?.dispatchEvent(new Event('submit'));
+
+    const request = http.expectOne((req) => req.method === 'POST');
+    expect(request.request.body).toEqual({ question: 'Why?', topK: 8 });
+  });
+
   it('goes back to the list when the notebook cannot be loaded', async () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 

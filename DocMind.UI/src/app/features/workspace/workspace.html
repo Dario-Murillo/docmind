@@ -1,18 +1,104 @@
-@if (notebook(); as notebook) {
-  <div class="notebook-bar">
+<app-header>
+  @if (sidebarFloats()) {
+    <button
+      matIconButton
+      type="button"
+      aria-label="Chats and documents"
+      [attr.aria-expanded]="sidebarOpen()"
+      (click)="sidebarOpen.set(!sidebarOpen())"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+  } @else {
     <a matIconButton routerLink="/" aria-label="Back to notebooks">
       <mat-icon>arrow_back</mat-icon>
     </a>
-    <h2>{{ notebook.title }}</h2>
-  </div>
+  }
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/">Notebooks</a>
+    <mat-icon>chevron_right</mat-icon>
+  </nav>
+  <h1 class="notebook-title">{{ notebook()?.title }}</h1>
 
-  <mat-drawer-container class="app-sidenav-container">
-    <mat-drawer class="app-sidebar" mode="side" opened>
-      <app-conversation-list [notebookId]="notebookId()" />
-      <app-upload [notebookId]="notebookId()" />
+  <div headerActions class="actions">
+    <button
+      matButton="outlined"
+      class="top-k"
+      type="button"
+      [attr.aria-label]="'Top K: ' + topK() + ' passages per question'"
+      [matMenuTriggerFor]="topKMenu"
+    >
+      <mat-icon>tune</mat-icon>
+      <span class="top-k-label">Top K: </span>{{ topK() }}
+    </button>
+    <mat-menu #topKMenu="matMenu" xPosition="before">
+      <p class="menu-hint">Passages retrieved per question</p>
+      @for (option of topKOptions; track option) {
+        <button
+          mat-menu-item
+          class="top-k-option"
+          type="button"
+          role="menuitemradio"
+          [attr.aria-checked]="option === topK()"
+          (click)="topK.set(option)"
+        >
+          <mat-icon>{{
+            option === topK() ? 'radio_button_checked' : 'radio_button_unchecked'
+          }}</mat-icon>
+          <span>{{ option }}</span>
+        </button>
+      }
+    </mat-menu>
+
+    <button
+      matIconButton
+      class="sources-toggle"
+      type="button"
+      aria-label="Sources panel"
+      [attr.aria-expanded]="sourcesOpen()"
+      [class.active]="sourcesOpen()"
+      (click)="sourcesOpen.set(!sourcesOpen())"
+    >
+      <mat-icon>format_quote</mat-icon>
+    </button>
+  </div>
+</app-header>
+
+@if (notebook()) {
+  <mat-drawer-container class="panes">
+    <mat-drawer
+      class="sidebar"
+      [mode]="sidebarFloats() ? 'over' : 'side'"
+      [opened]="sidebarOpen()"
+      [disableClose]="!sidebarFloats()"
+      (openedChange)="sidebarOpen.set($event)"
+    >
+      @if (sidebarFloats()) {
+        <a matButton class="all-notebooks" routerLink="/">
+          <mat-icon>arrow_back</mat-icon>
+          All notebooks
+        </a>
+      }
+      <app-conversation-list [notebookId]="notebookId()" (picked)="closeFloatingSidebar()" />
+      <app-upload
+        [notebookId]="notebookId()"
+        (documentDeleted)="conversations.forgetDocument($event)"
+      />
     </mat-drawer>
+
+    <mat-drawer
+      class="sources-panel"
+      position="end"
+      [mode]="sourcesFloat() ? 'over' : 'side'"
+      [opened]="sourcesOpen()"
+      [disableClose]="!sourcesFloat()"
+      (openedChange)="sourcesOpen.set($event)"
+    >
+      <app-sources (closed)="sourcesOpen.set(false)" />
+    </mat-drawer>
+
     <mat-drawer-content>
-      <app-query />
+      <app-query [topK]="topK()" (sourcesRequested)="sourcesOpen.set(true)" />
     </mat-drawer-content>
   </mat-drawer-container>
 }

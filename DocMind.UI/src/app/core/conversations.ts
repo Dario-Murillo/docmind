@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Service, computed, inject, signal } from '@angular/core';
+import { Service, computed, inject, linkedSignal, signal } from '@angular/core';
 import {
   Api,
   AskRequest,
@@ -37,6 +37,20 @@ export class Conversations {
       this.conversationList().find((existing) => existing.conversationId === this.openId())
         ?.title ?? 'New conversation',
   );
+
+  private readonly latestAnswer = computed(() =>
+    this.messageList()
+      .map((message) => !!message.sources?.length)
+      .lastIndexOf(true),
+  );
+  // The answer whose sources are shown, as an index into messages (-1 for none). It follows the
+  // latest answer, and the user can pick an earlier one until a new answer or chat replaces it.
+  private readonly answerIndex = linkedSignal(() => {
+    this.openId();
+    return this.latestAnswer();
+  });
+  readonly selectedAnswer = this.answerIndex.asReadonly();
+  readonly selectedSources = computed(() => this.messageList()[this.answerIndex()]?.sources ?? []);
 
   // Called once by ConversationList. Questions asked afterwards start conversations in this notebook.
   load(notebookId: string): void {
@@ -121,6 +135,29 @@ export class Conversations {
         ]);
       },
     });
+  }
+
+  selectAnswer(index: number): void {
+    this.answerIndex.set(index);
+  }
+
+  // The API nulls the DocumentId of a deleted document's sources. This does the same to the
+  // messages already on screen, so they don't keep a download link that answers 404.
+  forgetDocument(documentId: string): void {
+    this.messageList.update((messages) =>
+      messages.map((message) => ({
+        ...message,
+        sources: message.sources?.map((source) =>
+          source.documentId === documentId ? { ...source, documentId: null } : source,
+        ),
+      })),
+    );
+  }
+
+  confirmDelete({ conversationId, title }: ConversationResponse): void {
+    if (confirm(`Delete "${title}"? Its questions and answers will be lost.`)) {
+      this.delete(conversationId);
+    }
   }
 
   delete(conversationId: string): void {

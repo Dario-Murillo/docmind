@@ -63,7 +63,7 @@ describe('ConversationList', () => {
       .flush({ ...stored, messages: [] });
     await fixture.whenStable();
 
-    expect(element().querySelector('.conversation-item')?.classList).toContain('selected');
+    expect(element().querySelector('li')?.classList).toContain('selected');
   });
 
   it('deletes a conversation without opening it', async () => {
@@ -71,10 +71,14 @@ describe('ConversationList', () => {
     await respondWithConversations([stored]);
 
     (
-      element().querySelector('button[aria-label="Delete conversation"]') as HTMLButtonElement
+      element().querySelector(
+        'button[aria-label="Options for What is DocMind?"]',
+      ) as HTMLButtonElement
     ).click();
+    await fixture.whenStable();
+    (document.querySelector('.delete-option') as HTMLButtonElement).click();
 
-    // The click must not reach the list item underneath, which would open the conversation.
+    // Using the menu must not open the conversation.
     http.expectNone((req) => req.method === 'GET' && req.url.endsWith('/conversations/c1'));
     http
       .expectOne((req) => req.method === 'DELETE' && req.url.endsWith('/conversations/c1'))
