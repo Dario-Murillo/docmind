@@ -1,11 +1,28 @@
 @if (auth.currentUser(); as user) {
   <header>
-    <h1>{{ title() }}</h1>
-    <p class="hint">Local, self-hosted RAG document Q&amp;A.</p>
-    <div class="session">
-      <span>{{ user.email }}</span>
-      <button matButton type="button" (click)="logout()">Log out</button>
-    </div>
+    <h1>
+      <a routerLink="/">
+        <span class="logo"><mat-icon>psychology</mat-icon></span>
+        {{ title() }}
+      </a>
+    </h1>
+
+    <button
+      matIconButton
+      class="account"
+      type="button"
+      [attr.aria-label]="'Account: ' + user.email"
+      [matMenuTriggerFor]="accountMenu"
+    >
+      <span class="avatar">{{ user.email.charAt(0).toUpperCase() }}</span>
+    </button>
+    <mat-menu #accountMenu="matMenu" xPosition="before">
+      <p class="account-email">{{ user.email }}</p>
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Log out</span>
+      </button>
+    </mat-menu>
   </header>
 }
 
