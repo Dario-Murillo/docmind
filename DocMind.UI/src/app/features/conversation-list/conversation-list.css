@@ -1,29 +1,101 @@
 :host {
   display: block;
-  margin-bottom: 1rem;
+  padding: 16px 12px 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
-.conversations-card {
-  margin: 0;
-  box-sizing: border-box;
+.new-chat {
+  margin: 0 4px 12px;
 }
 
-.conversations-header {
+.section-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--mat-sys-primary);
+}
+
+.section-heading h2 {
+  flex: 1;
+  margin: 0;
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.count,
+.date {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* Scrolls by itself, so a long list never pushes Documents out of sight. */
+ul {
+  max-height: 32vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px;
+  padding-right: 4px;
+  border-radius: 26px;
+}
+
+li:hover {
+  background: var(--mat-sys-surface-container-high);
+}
+
+li.selected {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }
 
 .conversation-item {
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-.conversation-item.selected {
-  background: var(--mat-sys-secondary-container);
-}
-
-.conversation-actions {
+  flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  height: 52px;
+  padding: 0 4px 0 16px;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.conversation-item:disabled {
+  cursor: default;
+}
+
+.title {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--mat-sys-body-medium);
+}
+
+.selected .title {
+  font-weight: 500;
+}
+
+.empty,
+.error {
+  margin: 0;
+  padding: 8px 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.error {
+  border-radius: 12px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
 }

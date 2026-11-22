@@ -36,14 +36,3 @@ body {
   margin: 0;
   height: 100%;
 }
-
-// Tint headings with the theme's primary and tertiary colors so the palette reads
-// clearly in typography, not just on Material components.
-h1 {
-  color: var(--mat-sys-primary);
-}
-
-h2,
-h3 {
-  color: var(--mat-sys-tertiary);
-}

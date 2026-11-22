@@ -1,0 +1,33 @@
+<header>
+  <div class="start">
+    <ng-content>
+      <h1 class="brand">
+        <a routerLink="/">
+          <span class="logo"><mat-icon>psychology</mat-icon></span>
+          DocMind
+        </a>
+      </h1>
+    </ng-content>
+  </div>
+
+  <ng-content select="[headerActions]" />
+
+  @if (auth.currentUser(); as user) {
+    <button
+      matIconButton
+      class="account"
+      type="button"
+      [attr.aria-label]="'Account: ' + user.email"
+      [matMenuTriggerFor]="accountMenu"
+    >
+      <span class="avatar">{{ user.email.charAt(0).toUpperCase() }}</span>
+    </button>
+    <mat-menu #accountMenu="matMenu" xPosition="before">
+      <p class="account-email">{{ user.email }}</p>
+      <button mat-menu-item class="logout" type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Log out</span>
+      </button>
+    </mat-menu>
+  }
+</header>

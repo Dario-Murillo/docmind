@@ -1,21 +1,22 @@
-import { Component, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  afterRenderEffect,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Conversations } from '../../core/conversations';
 
 @Component({
-  imports: [
-    DecimalPipe,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CdkCopyToClipboard, MatButtonModule, MatIconModule, MatProgressBarModule],
   selector: 'app-query',
   styleUrl: './query.css',
   templateUrl: './query.html',
@@ -23,27 +24,44 @@ import { Conversations } from '../../core/conversations';
 export class Query {
   protected readonly conversations = inject(Conversations);
 
-  // The API's limits (ConversationService.MaxTopK and MaxQuestionLength).
-  protected readonly maxTopK = 10;
-  protected readonly maxQuestionLength = 2000;
+  readonly topK = input(5);
+  readonly sourcesRequested = output<void>();
 
+  // The API's limit (ConversationService.MaxQuestionLength).
+  protected readonly maxQuestionLength = 2000;
   protected readonly question = signal('');
-  protected readonly topK = signal(5);
+
+  private readonly scroller = viewChild.required<ElementRef<HTMLElement>>('scroller');
+  private readonly messageCount = computed(() => this.conversations.messages().length);
+
+  // Keeps the newest message in view: the composer is pinned, so the list scrolls on its own.
+  private readonly scrollToNewest = afterRenderEffect(() => {
+    this.messageCount();
+    this.conversations.status();
+    const element = this.scroller().nativeElement;
+    element.scrollTop = element.scrollHeight;
+  });
 
   protected onQuestionInput(event: Event): void {
     this.question.set((event.target as HTMLInputElement).value);
   }
 
-  protected onTopKInput(event: Event): void {
-    const value = Number((event.target as HTMLInputElement).value);
-    this.topK.set(
-      Number.isFinite(value) && value >= 1 ? Math.min(Math.floor(value), this.maxTopK) : 5,
-    );
-  }
-
   protected onSubmit(event: Event): void {
     event.preventDefault();
     this.ask();
+  }
+
+  protected showSources(index: number): void {
+    this.conversations.selectAnswer(index);
+    this.sourcesRequested.emit();
+  }
+
+  protected deleteOpenConversation(): void {
+    const id = this.conversations.selectedId();
+    const open = this.conversations.list().find((existing) => existing.conversationId === id);
+    if (open) {
+      this.conversations.confirmDelete(open);
+    }
   }
 
   protected ask(): void {

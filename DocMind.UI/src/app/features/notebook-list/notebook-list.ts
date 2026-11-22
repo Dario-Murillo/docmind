@@ -18,12 +18,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, RouterLink } from '@angular/router';
 import { Api, ErrorResponse, NotebookResponse } from '../../core/api';
+import { AppHeader } from '../../core/app-header/app-header';
 
 // Matches Notebook.MaxTitleLength in DocMind.Core, so the API's 400 is never what the user reads.
 const maxTitleLength = 100;
 
 @Component({
   imports: [
+    AppHeader,
     DatePipe,
     MatButtonModule,
     MatDialogModule,

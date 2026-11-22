@@ -2,29 +2,114 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--mat-sys-surface-container-low);
 }
 
-.notebook-bar {
+.breadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0 1.5rem 0.5rem;
+  gap: 4px;
+  color: var(--mat-sys-on-surface-variant);
 }
 
-.notebook-bar h2 {
+.breadcrumb a {
+  color: inherit;
+  font: var(--mat-sys-body-large);
+  text-decoration: none;
+}
+
+.notebook-title {
   margin: 0;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
 }
 
-.app-sidenav-container {
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-k {
+  border-radius: 8px;
+}
+
+.sources-toggle.active {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.menu-hint {
+  margin: 0;
+  padding: 8px 12px;
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.panes {
   flex: 1;
   min-height: 0;
+  margin: 0 12px 12px;
+
+  --mat-sidenav-container-background-color: var(--mat-sys-surface);
+  --mat-sidenav-container-divider-color: transparent;
+  --mat-sidenav-container-shape: 28px;
+  --mat-sidenav-content-background-color: var(--mat-sys-surface-container-low);
 }
 
-.app-sidebar {
-  width: 40%;
-  padding: 1rem 2rem;
+.sidebar,
+.sources-panel {
+  width: 320px;
+  max-width: calc(100% - 40px);
   box-sizing: border-box;
+  border-radius: 28px;
+}
+
+.all-notebooks {
+  margin: 12px 12px 0;
+}
+
+mat-drawer-content {
+  overflow: hidden;
+}
+
+app-query {
+  height: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1199px) {
+  app-query {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 839px) {
+  .breadcrumb {
+    display: none;
+  }
+
+  .panes {
+    margin: 0 8px 8px;
+  }
+
+  app-query {
+    padding: 0;
+  }
+}
+
+@media (max-width: 479px) {
+  .top-k-label {
+    display: none;
+  }
+
+  .notebook-title {
+    font: var(--mat-sys-title-medium);
+  }
 }

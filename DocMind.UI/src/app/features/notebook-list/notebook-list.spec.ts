@@ -76,7 +76,7 @@ describe('NotebookList', () => {
     expect(element().textContent).toContain('Thesis research');
     expect(element().textContent).toMatch(/1 document\b/);
     expect(element().textContent).toMatch(/3 documents\b/);
-    expect(element().querySelector('a')?.getAttribute('href')).toBe('/notebooks/n1');
+    expect(element().querySelector('h3 a')?.getAttribute('href')).toBe('/notebooks/n1');
   });
 
   it('shows an empty state when there are no notebooks', async () => {

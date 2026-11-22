@@ -82,12 +82,40 @@ describe('Upload', () => {
     expect(text()).toContain('Document indexed successfully.');
   });
 
+  it('ignores another file while one is uploading', async () => {
+    await respondWithDocuments([]);
+    component['setSelectedFile'](new File(['%PDF-'], 'first.pdf'));
+    component['upload']();
+
+    component['setSelectedFile'](new File(['%PDF-'], 'second.pdf'));
+
+    expect(component['selectedFile']()?.name).toBe('first.pdf');
+    http.expectOne((req) => req.method === 'POST');
+  });
+
+  it('keeps the browser from opening a file dropped while uploading', async () => {
+    await respondWithDocuments([]);
+    component['setSelectedFile'](new File(['%PDF-'], 'first.pdf'));
+    component['upload']();
+    await fixture.whenStable();
+
+    const drop = new Event('drop', { bubbles: true, cancelable: true });
+    fixture.nativeElement.querySelector('.drop-target').dispatchEvent(drop);
+
+    expect(drop.defaultPrevented).toBe(true);
+    http.expectOne((req) => req.method === 'POST');
+  });
+
   it('removes a document after deleting it', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     await respondWithDocuments([report]);
+    let deleted = '';
+    component.documentDeleted.subscribe((id) => (deleted = id));
 
     (
-      fixture.nativeElement.querySelector('button[aria-label="Delete"]') as HTMLButtonElement
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Delete report.pdf"]',
+      ) as HTMLButtonElement
     ).click();
     http
       .expectOne((req) => req.method === 'DELETE' && req.url.endsWith('/documents/d1'))
@@ -95,6 +123,7 @@ describe('Upload', () => {
     await fixture.whenStable();
 
     expect(text()).not.toContain('report.pdf');
+    expect(deleted).toBe('d1');
   });
 
   it('does not delete when the confirmation is cancelled', async () => {
@@ -102,7 +131,9 @@ describe('Upload', () => {
     await respondWithDocuments([report]);
 
     (
-      fixture.nativeElement.querySelector('button[aria-label="Delete"]') as HTMLButtonElement
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Delete report.pdf"]',
+      ) as HTMLButtonElement
     ).click();
 
     http.expectNone((req) => req.method === 'DELETE');

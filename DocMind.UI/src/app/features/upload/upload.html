@@ -1,80 +1,94 @@
-<section class="card upload-card">
-  <h2>Upload a document</h2>
-  <p class="hint">
-    PDF files only. Questions in this notebook are answered from the documents you upload here.
-  </p>
+<section aria-labelledby="documents-heading">
+  <div class="section-heading">
+    <mat-icon>folder_open</mat-icon>
+    <h2 id="documents-heading">Documents</h2>
+    @if (documents().length > 0) {
+      <span class="count">
+        {{ documents().length }} · {{ totalBytes() / (1024 * 1024) | number: '1.0-1' }} MB
+      </span>
+    }
+  </div>
 
-  <label
-    class="dropzone"
-    [class.dropzone-active]="isDragOver()"
+  <!-- The drop handlers are on the wrapper because a disabled button gets no events, and a PDF
+       dropped on it mid-upload would be opened by the browser, leaving the app. -->
+  <div
+    class="drop-target"
     (dragover)="onDragOver($event)"
     (dragleave)="onDragLeave($event)"
     (drop)="onDrop($event)"
   >
-    <mat-icon>upload_file</mat-icon>
-    @if (selectedFile(); as file) {
-      <span>{{ file.name }}</span>
-    } @else {
-      <span>Drag &amp; drop a PDF here, or click to browse</span>
-    }
-    <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
-  </label>
+    <button
+      class="dropzone"
+      type="button"
+      [class.dropzone-active]="isDragOver()"
+      [disabled]="status() === 'uploading'"
+      (click)="fileInput.click()"
+    >
+      <mat-icon>upload_file</mat-icon>
+      <span class="text">
+        <span class="name">Drop a PDF or browse</span>
+        <span class="detail">Up to 25 MB</span>
+      </span>
+    </button>
+  </div>
+  <input #fileInput type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
 
-  <button
-    matFab
-    extended
-    class="upload-button"
-    type="button"
-    (click)="upload()"
-    [disabled]="!selectedFile() || status() === 'uploading'"
-  >
-    @if (status() === 'uploading') {
-      <mat-spinner diameter="20" />
-    } @else {
-      <mat-icon>add</mat-icon>
-    }
-    @if (status() === 'uploading') {
-      Uploading…
-    } @else {
-      Upload
-    }
-  </button>
+  @if (selectedFile(); as file) {
+    <div class="pending">
+      <mat-icon>picture_as_pdf</mat-icon>
+      <span class="text">
+        <span class="name">{{ file.name }}</span>
+        @if (status() === 'uploading') {
+          <mat-progress-bar mode="indeterminate" aria-label="Indexing document" />
+          <span class="detail">Indexing…</span>
+        }
+      </span>
+      @if (status() !== 'uploading') {
+        <button matButton="filled" class="upload-button" type="button" (click)="upload()">
+          Upload
+        </button>
+      }
+    </div>
+  }
 
   @if (status() === 'success') {
-    <p class="message success">{{ message() }}</p>
+    <p class="message" role="status">{{ message() }}</p>
   }
   @if (status() === 'error') {
-    <p class="message error">{{ message() }}</p>
+    <p class="message error" role="alert">{{ message() }}</p>
   }
 
-  <h3>Your documents</h3>
   @if (documents().length === 0) {
-    <p class="hint">No documents yet. Upload a PDF to start asking questions about it.</p>
+    <p class="empty">No documents yet. Upload a PDF to start asking questions about it.</p>
   } @else {
-    <mat-list>
+    <ul>
       @for (document of documents(); track document.documentId) {
-        <mat-list-item>
-          <mat-icon matListItemIcon>description</mat-icon>
-          <span matListItemTitle>{{ document.fileName }}</span>
-          <span matListItemLine>
-            {{ document.sizeBytes / 1024 | number: '1.0-0' }} KB ·
-            {{ document.createdAt | date: 'short' }}
+        <li>
+          <mat-icon>picture_as_pdf</mat-icon>
+          <span class="text">
+            <span class="name" [title]="document.fileName">{{ document.fileName }}</span>
+            <span class="detail">
+              {{ document.sizeBytes / 1024 | number: '1.0-0' }} KB ·
+              {{ document.createdAt | date: 'MMM d' }}
+            </span>
           </span>
-          <span matListItemMeta class="document-actions">
-            <a mat-icon-button [href]="fileUrl(document.documentId)" aria-label="Download">
-              <mat-icon>download</mat-icon>
-            </a>
-            <button
-              mat-icon-button
-              type="button"
-              aria-label="Delete"
-              (click)="deleteDocument(document)"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          </span>
-        </mat-list-item>
+          <a
+            matIconButton
+            [href]="fileUrl(document.documentId)"
+            [attr.aria-label]="'Download ' + document.fileName"
+          >
+            <mat-icon>download</mat-icon>
+          </a>
+          <button
+            matIconButton
+            type="button"
+            [attr.aria-label]="'Delete ' + document.fileName"
+            (click)="deleteDocument(document)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </li>
       }
-    </mat-list>
+    </ul>
   }
 </section>

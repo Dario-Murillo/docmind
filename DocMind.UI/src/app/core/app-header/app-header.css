@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  flex: none;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.start {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.brand {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+}
+
+.brand a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mat-sys-on-surface);
+  text-decoration: none;
+}
+
+.logo,
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.logo {
+  border-radius: 12px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+/* More specific than Material's own padding, which would push the avatar off center. */
+header button.account {
+  flex: none;
+  padding: 0;
+}
+
+.avatar {
+  border-radius: 50%;
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+  font: var(--mat-sys-title-medium);
+}
+
+.account-email {
+  margin: 0;
+  padding: 8px 12px;
+  overflow-wrap: anywhere;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 599px) {
+  header {
+    gap: 4px;
+    padding: 0 8px;
+  }
+}

@@ -1,0 +1,42 @@
+<div class="panel-heading">
+  <h2>Sources</h2>
+  <button matIconButton type="button" aria-label="Close sources" (click)="closed.emit()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+@if (conversations.selectedSources().length === 0) {
+  <p class="hint-text">The passages behind each answer will appear here.</p>
+} @else {
+  <p class="hint-text">Passages used for the selected answer, by similarity.</p>
+  <ol>
+    @for (source of conversations.selectedSources(); track $index) {
+      <li [class.deleted]="!source.documentId">
+        <div class="source-heading">
+          <span class="rank">{{ $index + 1 }}</span>
+          <span class="file-name" [title]="source.fileName">{{ source.fileName }}</span>
+          <span class="chunk">#{{ source.sequenceNumber }}</span>
+        </div>
+        <p class="excerpt">“{{ source.excerpt }}”</p>
+        <div class="source-footer">
+          <mat-progress-bar
+            [value]="source.score * 100"
+            [attr.aria-label]="'Similarity of ' + source.fileName"
+          />
+          <span class="score">{{ source.score | number: '1.2-2' }}</span>
+          @if (source.documentId; as documentId) {
+            <a
+              matIconButton
+              [href]="fileUrl(documentId)"
+              [attr.aria-label]="'Download ' + source.fileName"
+            >
+              <mat-icon>download</mat-icon>
+            </a>
+          } @else {
+            <span class="deleted-label"><mat-icon>link_off</mat-icon>Deleted</span>
+          }
+        </div>
+      </li>
+    }
+  </ol>
+}

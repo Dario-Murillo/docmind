@@ -1,21 +1,13 @@
-import { Component, OnInit, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Api, ErrorResponse, UploadStatus, DocumentResponse } from '../../core/api';
 
 @Component({
-  imports: [
-    DatePipe,
-    DecimalPipe,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [DatePipe, DecimalPipe, MatButtonModule, MatIconModule, MatProgressBarModule],
   selector: 'app-upload',
   styleUrl: './upload.css',
   templateUrl: './upload.html',
@@ -24,12 +16,16 @@ export class Upload implements OnInit {
   private readonly api = inject(Api);
 
   readonly notebookId = input.required<string>();
+  readonly documentDeleted = output<string>();
 
   protected readonly selectedFile = signal<File | null>(null);
   protected readonly status = signal<UploadStatus>('idle');
   protected readonly message = signal<string | null>(null);
   protected readonly documents = signal<DocumentResponse[]>([]);
   protected readonly isDragOver = signal(false);
+  protected readonly totalBytes = computed(() =>
+    this.documents().reduce((total, document) => total + document.sizeBytes, 0),
+  );
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -38,6 +34,8 @@ export class Upload implements OnInit {
   protected onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.setSelectedFile(input.files?.item(0) ?? null);
+    // Otherwise choosing the same file again doesn't fire change.
+    input.value = '';
   }
 
   protected onDragOver(event: DragEvent): void {
@@ -57,6 +55,10 @@ export class Upload implements OnInit {
   }
 
   private setSelectedFile(file: File | null): void {
+    if (this.status() === 'uploading') {
+      return;
+    }
+
     this.selectedFile.set(file);
     this.status.set('idle');
     this.message.set(null);
@@ -74,6 +76,7 @@ export class Upload implements OnInit {
     this.api.uploadDocument(this.notebookId(), file).subscribe({
       next: (response) => {
         this.status.set('success');
+        this.selectedFile.set(null);
         this.message.set(response.message);
         this.loadDocuments();
       },
@@ -95,10 +98,12 @@ export class Upload implements OnInit {
     }
 
     this.api.deleteDocument(document.documentId).subscribe({
-      next: () =>
+      next: () => {
         this.documents.update((documents) =>
           documents.filter((existing) => existing.documentId !== document.documentId),
-        ),
+        );
+        this.documentDeleted.emit(document.documentId);
+      },
       error: (error: HttpErrorResponse) => {
         this.status.set('error');
         const body = error.error as ErrorResponse | undefined;
