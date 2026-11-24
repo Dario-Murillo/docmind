@@ -33,7 +33,7 @@
       } @else {
         <div class="answer">
           <p class="author"><mat-icon>auto_awesome</mat-icon>DocMind</p>
-          <p class="answer-text">{{ message.text }}</p>
+          <div class="answer-text" [innerHTML]="message.text | markdown"></div>
           <div class="answer-actions">
             @if (message.sources?.length; as count) {
               <button
