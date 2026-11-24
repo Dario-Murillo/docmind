@@ -14,9 +14,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Conversations } from '../../core/conversations';
+import { MarkdownPipe } from '../../core/markdown-pipe';
 
 @Component({
-  imports: [CdkCopyToClipboard, MatButtonModule, MatIconModule, MatProgressBarModule],
+  imports: [CdkCopyToClipboard, MarkdownPipe, MatButtonModule, MatIconModule, MatProgressBarModule],
   selector: 'app-query',
   styleUrl: './query.css',
   templateUrl: './query.html',

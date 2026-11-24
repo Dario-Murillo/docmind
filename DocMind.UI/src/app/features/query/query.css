@@ -52,8 +52,20 @@ h2 {
 
 .question,
 .answer-text {
-  white-space: pre-wrap;
   font: var(--mat-sys-body-large);
+}
+
+/* The answer's HTML comes from innerHTML, which view encapsulation doesn't reach. */
+.answer-text ::ng-deep :is(p, ul, ol) {
+  margin: 0 0 0.75em;
+}
+
+.answer-text ::ng-deep :is(p, ul, ol):last-child {
+  margin-bottom: 0;
+}
+
+.answer-text ::ng-deep :is(ul, ol) {
+  padding-left: 1.5em;
 }
 
 .question {
